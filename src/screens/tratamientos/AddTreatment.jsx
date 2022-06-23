@@ -8,8 +8,8 @@ import Title from "../../components/Title";
 
 import { db } from "../../db/Queries";
 
-const Container = styled.View`
-  padding: 15px 15px 0 15px;
+const Container = styled.ScrollView`
+  padding: 15px;
 `;
 
 const InputDiv = styled.View`
@@ -86,6 +86,7 @@ const VehiclesContainer = styled.ScrollView`
 export default function AddTreatment({ navigation }) {
   const [user, setUser] = useState(null);
   const [treatment, setTreatment] = useState({
+    Id: "0",
     Titulo: "",
     Costo: "",
     Cliente: null,
@@ -101,6 +102,7 @@ export default function AddTreatment({ navigation }) {
         [treatment.Titulo, treatment.Cliente, treatment.Costo],
         (_, results) => {
           let aux = new Array();
+          treatment.Id = results.insertId;
 
           reparaciones.forEach((r) => {
             aux.push(r);
@@ -146,7 +148,12 @@ export default function AddTreatment({ navigation }) {
   };
 
   return (
-    <Container>
+    <Container
+      contentContainerStyle={{
+        flex: 1,
+        flexDirection: "column",
+      }}
+    >
       <InputSub
         placeholder="Titulo"
         defaultValue={treatment?.Titulo}

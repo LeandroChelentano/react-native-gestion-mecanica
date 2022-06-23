@@ -6,20 +6,25 @@ import Title from "../components/Title";
 
 import { createTables } from "../db/Queries";
 
-const Container = styled.View`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+const Container = styled.ScrollView`
+  padding: 15px;
+  padding-top: 0px;
+  margin-bottom: 15px;
 `;
 
 export default function Home({ navigation }) {
   React.useEffect(() => {
-    // createTables();
+    createTables();
   });
 
   return (
-    <Container>
+    <Container
+      contentContainerStyle={{
+        flex: 1,
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
       <Title>Car Treatment Center</Title>
       <Button path="Clientes" navigation={navigation}>
         Ver los clientes

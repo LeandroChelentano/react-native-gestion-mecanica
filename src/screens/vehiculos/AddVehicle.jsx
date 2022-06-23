@@ -8,8 +8,8 @@ import Title from "../../components/Title";
 
 import { db } from "../../db/Queries";
 
-const Container = styled.View`
-  padding: 15px 15px 0 15px;
+const Container = styled.ScrollView`
+  padding: 15px;
 `;
 
 const InputDiv = styled.View`
@@ -123,7 +123,12 @@ export default function AddVehicle({ navigation }) {
   };
 
   return (
-    <Container>
+    <Container
+      contentContainerStyle={{
+        flex: 1,
+        flexDirection: "column",
+      }}
+    >
       <InputSub
         placeholder="Serial"
         defaultValue={vehicle?.serial}

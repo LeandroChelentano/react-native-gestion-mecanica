@@ -62,7 +62,7 @@ const createTableTratamientos = () => {
   db.transaction((txn) => {
     txn.executeSql(
       `
-create table Tratamientos (
+create table if not exists Tratamientos (
   Id integer primary key,
   Titulo varchar(30) not null,
   Cliente integer references Clientes(CI),

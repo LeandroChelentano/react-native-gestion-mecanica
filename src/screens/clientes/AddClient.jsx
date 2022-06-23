@@ -5,9 +5,10 @@ import { ClientsContext } from "../../components/ClientsContext";
 
 import { db } from "../../db/Queries";
 
-const Container = styled.View`
-  padding-left: 15px;
-  padding-right: 15px;
+const Container = styled.ScrollView`
+  padding: 15px;
+  padding-top: 0px;
+  margin-bottom: 15px;
 `;
 
 const VehiclesContainer = styled.ScrollView`
@@ -17,6 +18,7 @@ const VehiclesContainer = styled.ScrollView`
   padding: 0 5px;
   height: 250px;
   border: 1px solid #d3d3d3;
+  width: 100%;
 `;
 
 const InputDiv = styled.View`
@@ -87,6 +89,7 @@ const Selected = styled.TouchableHighlight`
   padding: 5px;
   border: 1px solid gray;
   background-color: #d3d3d3;
+  width: 100%;
 `;
 
 export default function EditClient({ navigation }) {
@@ -126,9 +129,14 @@ export default function EditClient({ navigation }) {
         `INSERT INTO Clientes (Nombre, Apellido, CI, Vehiculo) VALUES (?, ?, ?, ?);`,
         [user.Nombre, user.Apellido, user.CI, user.Vehiculo],
         (_, results) => {
-          let temp = new Array(clientes);
+          let temp = new Array();
+          clientes.forEach((c) => {
+            temp.push(c);
+          });
           temp.push(user);
+
           setClientes(temp);
+          navigation.navigate("Clientes");
         },
         (_, error) => {
           console.log(error);
@@ -160,11 +168,15 @@ export default function EditClient({ navigation }) {
     if (alreadyExists) return;
 
     updateRootList();
-    navigation.goBack();
   };
 
   return (
-    <Container>
+    <Container
+      contentContainerStyle={{
+        flex: 1,
+        flexDirection: "column",
+      }}
+    >
       <InputDiv>
         <Input
           placeholder="Nombre"

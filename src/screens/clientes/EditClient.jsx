@@ -7,9 +7,8 @@ import { db } from "../../db/Queries";
 
 import Subtitle from "../../components/Subtitle";
 
-const Container = styled.View`
-  padding-left: 15px;
-  padding-right: 15px;
+const Container = styled.ScrollView`
+  padding: 15px;
 `;
 
 const VehiclesContainer = styled.ScrollView`
@@ -27,7 +26,7 @@ const InputDiv = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin: 15px 0;
+  margin-bottom: 15px;
 `;
 
 const Input = styled.TextInput`
@@ -147,7 +146,12 @@ export default function EditClient({ route, navigation }) {
   };
 
   return (
-    <Container>
+    <Container
+      contentContainerStyle={{
+        flex: 1,
+        flexDirection: "column",
+      }}
+    >
       <InputDiv>
         <Input
           placeholder="Nombre"
