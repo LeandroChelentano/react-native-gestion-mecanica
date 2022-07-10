@@ -22,13 +22,14 @@ const Text = styled.Text`
 `;
 
 export default function TreatmentsTable({ navigation }) {
-  const { reparaciones } = useContext(ClientsContext);
+  const { reparaciones, clientes } = useContext(ClientsContext);
 
   return (
     <>
       <Table>
         {reparaciones && reparaciones.length > 0 ? (
           reparaciones.map((reparacion, index) => {
+            const cliente = clientes.find((c) => c.Id === reparacion.Cliente);
             return (
               <Row
                 key={index}
@@ -38,7 +39,11 @@ export default function TreatmentsTable({ navigation }) {
                   });
                 }}
               >
-                <Text>{`${reparacion.Id}: ${reparacion.Titulo}\n\tCliente: ${reparacion.Cliente}\n\tCosto:   $${reparacion.Costo}`}</Text>
+                <Text>{`${reparacion.Id} - ${reparacion.Titulo}\n\tCliente: ${
+                  cliente.Nombre
+                } ${cliente.Apellido} (${cliente.CI})\n\tCosto: $${
+                  reparacion.Costo || 0
+                }`}</Text>
               </Row>
             );
           })

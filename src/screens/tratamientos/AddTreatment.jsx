@@ -8,6 +8,8 @@ import Title from "../../components/Title";
 
 import { db } from "../../db/Queries";
 
+import { Alert } from "react-native";
+
 const Container = styled.ScrollView`
   padding: 15px;
 `;
@@ -86,27 +88,31 @@ const VehiclesContainer = styled.ScrollView`
 export default function AddTreatment({ navigation }) {
   const [user, setUser] = useState(null);
   const [treatment, setTreatment] = useState({
-    Id: "0",
     Titulo: "",
     Costo: "",
-    Cliente: null,
+    FechaInicio: "",
   });
 
   const { clientes, reparaciones, setReparaciones } =
     useContext(ClientsContext);
 
   const updateRootList = () => {
+    let id = newId();
+    let date = new Date();
+    date = date.toLocaleDateString("es-UY");
     db.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO Tratamientos (Titulo, Cliente, Costo) VALUES (?, ?, ?);`,
-        [treatment.Titulo, treatment.Cliente, treatment.Costo],
+        `INSERT INTO Tratamientos (Id, Titulo, Cliente, FechaInicio) VALUES (?, ?, ?, ?);`,
+        [id, treatment.Titulo, treatment.Cliente, date],
         (_, results) => {
           let aux = new Array();
-          treatment.Id = results.insertId;
 
           reparaciones.forEach((r) => {
             aux.push(r);
           });
+
+          treatment.Id = id;
+          treatment.FechaInicio = date;
           aux.push(treatment);
 
           setReparaciones(aux);
@@ -119,30 +125,51 @@ export default function AddTreatment({ navigation }) {
     });
   };
 
+  const newId = () => {
+    let id = 0;
+    reparaciones.forEach((r) => {
+      if (r.Id > id) id = r.Id;
+    });
+    return id + 1;
+  };
+
   const handleSave = () => {
-    if (
-      treatment.Titulo == "" ||
-      treatment.Cliente == null ||
-      treatment.Costo == ""
-    )
+    if (treatment.Titulo == "" || treatment.Cliente == null) {
+      Alert.alert("Error", "Hay elementos en blanco", [{ text: "OK" }], {
+        cancelable: false,
+      });
       return;
+    }
 
     try {
-      parseInt(treatment.Costo);
-    } catch {
+      if (isNaN(treatment.Costo)) throw error;
+    } catch (error) {
+      Alert.alert("Error", "El costo debe ser numerico", [{ text: "OK" }], {
+        cancelable: false,
+      });
       return;
     }
 
     let tieneVehiculo = false;
     clientes.forEach((c) => {
-      if (c.CI == treatment.Cliente) {
+      if (c.Id == treatment.Cliente) {
         if (c.Vehiculo != null) {
           tieneVehiculo = true;
         }
       }
     });
 
-    if (!tieneVehiculo) return;
+    if (!tieneVehiculo) {
+      Alert.alert(
+        "Error",
+        "El cliente seleccionado no posee un vehiculo",
+        [{ text: "OK" }],
+        {
+          cancelable: false,
+        }
+      );
+      return;
+    }
 
     updateRootList();
   };
@@ -161,13 +188,6 @@ export default function AddTreatment({ navigation }) {
           setTreatment({ ...treatment, Titulo: text });
         }}
       />
-      <InputSub
-        placeholder="Costo"
-        defaultValue={treatment?.Costo}
-        onChangeText={(text) => {
-          setTreatment({ ...treatment, Costo: text });
-        }}
-      />
       <Selected
         onPress={() => {
           setUser(null);
@@ -183,13 +203,13 @@ export default function AddTreatment({ navigation }) {
       <PB>Clientes:</PB>
       <VehiclesContainer>
         {clientes.map((c) => {
-          if (c.CI === treatment?.Cliente) return null;
+          if (c.Id === treatment?.Cliente) return null;
           return (
             <Row
               key={c.CI}
               onPress={() => {
                 setUser(c);
-                setTreatment({ ...treatment, Cliente: c.CI });
+                setTreatment({ ...treatment, Cliente: c.Id });
               }}
             >
               <P>{`${c.Nombre} ${c.Apellido}\n\t${c.CI}`}</P>

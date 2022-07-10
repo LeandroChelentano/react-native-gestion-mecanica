@@ -5,6 +5,8 @@ import { ClientsContext } from "../../components/ClientsContext";
 
 import { db } from "../../db/Queries";
 
+import { Alert } from "react-native";
+
 const Container = styled.ScrollView`
   padding: 15px;
   padding-top: 0px;
@@ -21,6 +23,12 @@ const VehiclesContainer = styled.ScrollView`
   width: 100%;
 `;
 
+const Row = styled.TouchableHighlight`
+  margin-top: 5px;
+  padding: 5px;
+  border: 1px solid gray;
+`;
+
 const InputDiv = styled.View`
   width: 100%;
   display: flex;
@@ -30,19 +38,19 @@ const InputDiv = styled.View`
   margin: 15px 0;
 `;
 
-const Input = styled.TextInput`
-  padding: 3px 5px;
-  border: 1px solid #000000;
-  font-size: 24px;
-  font-weight: bold;
-  width: 49%;
-`;
-
 const InputCI = styled.TextInput`
   padding: 3px 5px;
   border: 1px solid #d3d3d3;
   color: #000000;
   font-size: 18px;
+  width: 49%;
+`;
+
+const Input = styled.TextInput`
+  padding: 3px 5px;
+  border: 1px solid #000000;
+  font-size: 24px;
+  font-weight: bold;
   width: 49%;
 `;
 
@@ -78,12 +86,6 @@ const PB = styled.Text`
   margin-top: 15px;
 `;
 
-const Row = styled.TouchableHighlight`
-  margin-top: 5px;
-  padding: 5px;
-  border: 1px solid gray;
-`;
-
 const Selected = styled.TouchableHighlight`
   margin: 5px 0 10px 0;
   padding: 5px;
@@ -94,6 +96,7 @@ const Selected = styled.TouchableHighlight`
 
 export default function EditClient({ navigation }) {
   const [user, setUser] = useState({
+    Id: "",
     Nombre: "",
     Apellido: "",
     CI: "",
@@ -103,36 +106,42 @@ export default function EditClient({ navigation }) {
 
   const { clientes, setClientes, vehiculos } = useContext(ClientsContext);
 
+  const getNewId = () => {
+    let id = 0;
+    clientes.forEach((c) => {
+      if (c.Id > id) id = c.Id;
+    });
+
+    return id + 1;
+  };
+
   const getNoOwnerVehicles = () => {
     let toBeReturned = new Array();
 
     vehiculos.forEach((veh) => {
-      if (!isInUse(veh.Matricula)) {
-        toBeReturned.push(veh);
-      }
+      let inUse = false;
+      clientes.forEach((c) => {
+        if (c.Vehiculo == veh.Id) inUse = true;
+      });
+
+      if (!inUse) toBeReturned.push(veh);
     });
 
     return toBeReturned;
   };
 
-  const isInUse = (mat) => {
-    clientes.forEach((cli) => {
-      if (cli.Vehiculo == mat) return true;
-    });
-
-    return false;
-  };
-
   const updateRootList = () => {
+    let id = getNewId();
     db.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO Clientes (Nombre, Apellido, CI, Vehiculo) VALUES (?, ?, ?, ?);`,
-        [user.Nombre, user.Apellido, user.CI, user.Vehiculo],
+        `INSERT INTO Clientes (Id, Nombre, Apellido, CI, Vehiculo) VALUES (?, ?, ?, ?, ?);`,
+        [id, user.Nombre, user.Apellido, user.CI, user.Vehiculo],
         (_, results) => {
           let temp = new Array();
           clientes.forEach((c) => {
             temp.push(c);
           });
+          user.Id = id;
           temp.push(user);
 
           setClientes(temp);
@@ -146,17 +155,31 @@ export default function EditClient({ navigation }) {
   };
 
   const handleSave = () => {
-    if (
-      user.Nombre == "" ||
-      user.Apellido == "" ||
-      user.CI == "" ||
-      user.CI.length > 8
-    )
+    if (user.Nombre == "" || user.Apellido == "" || user.CI == "") {
+      Alert.alert("Error", "Hay elementos en blanco", [{ text: "OK" }], {
+        cancelable: false,
+      });
       return;
+    }
+
+    if (user.CI.length > 8) {
+      Alert.alert(
+        "Error",
+        "La cedula solo puede tener 8 caracteres",
+        [{ text: "OK" }],
+        {
+          cancelable: false,
+        }
+      );
+      return;
+    }
 
     try {
-      parseInt(user.CI);
-    } catch {
+      if (isNaN(user.CI)) throw error;
+    } catch (error) {
+      Alert.alert("Error", "La cedula debe ser numerica", [{ text: "OK" }], {
+        cancelable: false,
+      });
       return;
     }
 
@@ -165,7 +188,15 @@ export default function EditClient({ navigation }) {
       if (c.CI == user.CI) alreadyExists = true;
     });
 
-    if (alreadyExists) return;
+    if (alreadyExists) {
+      Alert.alert(
+        "Error",
+        "Ya hay un cliente con esa cedula",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
 
     updateRootList();
   };
@@ -218,7 +249,7 @@ export default function EditClient({ navigation }) {
               key={v.Matricula}
               onPress={() => {
                 setVehicle(v);
-                setUser({ ...user, Vehiculo: v.Matricula });
+                setUser({ ...user, Vehiculo: v.Id });
               }}
             >
               <P>{`Matricula: ${v.Matricula}\n\tMarca: "${v.Marca}"\n\tSerial:  "${v.serial}"`}</P>

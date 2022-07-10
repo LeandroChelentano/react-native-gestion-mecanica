@@ -7,6 +7,8 @@ import { db } from "../../db/Queries";
 
 import Subtitle from "../../components/Subtitle";
 
+import { Alert } from "react-native";
+
 const Container = styled.ScrollView`
   padding: 15px;
 `;
@@ -82,18 +84,25 @@ const Selected = styled.TouchableHighlight`
   background-color: #d3d3d3;
 `;
 
+const InputSub = styled.TextInput`
+  padding: 3px 5px;
+  border: 1px solid #d3d3d3;
+  font-size: 18px;
+  width: 49%;
+`;
+
 export default function EditClient({ route, navigation }) {
   const [user, setUser] = useState(null);
   const [vehicle, setVehicle] = useState(null);
 
   const { clientes, setClientes, vehiculos } = useContext(ClientsContext);
 
-  const { clientCI } = route.params;
+  const { clientID } = route.params;
 
   useEffect(() => {
     if (user == null) {
-      const cliente = clientes.find((cliente) => cliente.CI === clientCI);
-      const veh = vehiculos.find((vehi) => vehi.Matricula === cliente.Vehiculo);
+      const cliente = clientes.find((cliente) => cliente.Id === clientID);
+      const veh = vehiculos.find((vehi) => vehi.Id === cliente.Vehiculo);
       setUser(cliente);
       setVehicle(veh);
     }
@@ -103,32 +112,27 @@ export default function EditClient({ route, navigation }) {
     let toBeReturned = new Array();
 
     vehiculos.forEach((veh) => {
-      if (!isInUse(veh.Matricula)) {
-        toBeReturned.push(veh);
-      }
+      let inUse = false;
+      clientes.forEach((c) => {
+        if (c.Vehiculo == veh.Id && c.Id != user?.Id) inUse = true;
+      });
+
+      if (!inUse) toBeReturned.push(veh);
     });
 
     return toBeReturned;
   };
 
-  const isInUse = (mat) => {
-    clientes.forEach((cli) => {
-      if (cli.Vehiculo == mat) return true;
-    });
-
-    return false;
-  };
-
   const updateRootList = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        `UPDATE Clientes SET Nombre=?, Apellido=?, Vehiculo=? WHERE CI=?;`,
-        [user.Nombre, user.Apellido, user.Vehiculo, user.CI],
+        `UPDATE Clientes SET Nombre=?, Apellido=?, Vehiculo=?, CI=? WHERE Id=?;`,
+        [user.Nombre, user.Apellido, user.Vehiculo, user.CI, user.Id],
         (_, results) => {
           let temp = new Array();
 
           for (let i = 0; i < clientes.length; ++i)
-            if (clientes[i].CI != user.CI) temp.push(clientes[i]);
+            if (clientes[i].Id != user.Id) temp.push(clientes[i]);
 
           temp.push(user);
           setClientes(temp);
@@ -141,6 +145,25 @@ export default function EditClient({ route, navigation }) {
   };
 
   const handleSave = () => {
+    let existe = false;
+    clientes.forEach((c) => {
+      if (c.CI == user.CI && c.Id != user.Id) {
+        existe = true;
+      }
+    });
+
+    if (existe) {
+      Alert.alert(
+        "Error",
+        "Ya hay un cliente con esa cedula",
+        [{ text: "OK" }],
+        {
+          cancelable: false,
+        }
+      );
+      return;
+    }
+
     updateRootList();
     navigation.navigate("Clientes");
   };
@@ -166,7 +189,11 @@ export default function EditClient({ route, navigation }) {
           onChangeText={(text) => setUser({ ...user, Apellido: text })}
         />
       </InputDiv>
-      <Subtitle>CI: {user?.CI}</Subtitle>
+      <InputSub
+        placeholder="Cedula"
+        defaultValue={user?.CI}
+        onChangeText={(text) => setUser({ ...user, CI: text })}
+      />
       <PB>Vehiculo en propiedad:</PB>
       <Selected
         onPress={() => {
@@ -183,13 +210,13 @@ export default function EditClient({ route, navigation }) {
       <PB>Vehiculos sin propietario:</PB>
       <VehiclesContainer>
         {getNoOwnerVehicles().map((v) => {
-          if (v.Matricula === vehicle?.Matricula) return null;
+          if (v.Id === vehicle?.Id) return null;
           return (
             <Row
               key={v.Matricula}
               onPress={() => {
                 setVehicle(v);
-                setUser({ ...user, Vehiculo: v.Matricula });
+                setUser({ ...user, Vehiculo: v.Id });
               }}
             >
               <P>{`Matricula: ${v.Matricula}\n\tMarca: "${v.Marca}"\n\tSerial:  "${v.serial}"`}</P>
@@ -200,8 +227,12 @@ export default function EditClient({ route, navigation }) {
       <Save onPress={() => handleSave()}>
         <P>Guardar</P>
       </Save>
-      <Delete>
-        <P>Eliminar cliente</P>
+      <Delete
+        onPress={() => {
+          navigation.navigate("Clientes");
+        }}
+      >
+        <P>Cancelar</P>
       </Delete>
     </Container>
   );

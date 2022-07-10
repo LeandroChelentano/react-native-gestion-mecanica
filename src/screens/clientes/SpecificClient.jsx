@@ -52,7 +52,7 @@ export default function SpecificClient({ route, navigation }) {
 
   const { clientes, setClientes, vehiculos } = useContext(ClientsContext);
 
-  const { clientCI } = route.params;
+  const { clientID } = route.params;
 
   useEffect(() => {
     console.log("useEffect called");
@@ -62,13 +62,11 @@ export default function SpecificClient({ route, navigation }) {
   const getData = () => {
     console.log("useFocusEffect called");
     if (!user) {
-      const cliente = clientes.find((cliente) => cliente.CI === clientCI);
+      const cliente = clientes.find((cliente) => cliente.Id === clientID);
       if (cliente) setUser(cliente);
 
       if (cliente?.Vehiculo) {
-        const veh = vehiculos.find(
-          (vehi) => vehi.Matricula === cliente.Vehiculo
-        );
+        const veh = vehiculos.find((vehi) => vehi.Id === cliente.Vehiculo);
         setVehicle(veh);
       }
     }
@@ -77,8 +75,8 @@ export default function SpecificClient({ route, navigation }) {
   const updateRootList = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        `DELETE FROM Clientes WHERE CI=?;`,
-        [user.CI],
+        `DELETE FROM Clientes WHERE Id=?;`,
+        [user.Id],
         (_, results) => {
           let temp = new Array();
 
@@ -113,7 +111,7 @@ export default function SpecificClient({ route, navigation }) {
       )}
       <Edit
         onPress={() => {
-          navigation.navigate("Editar Cliente", { clientCI: clientCI });
+          navigation.navigate("Editar Cliente", { clientID: clientID });
         }}
       >
         <P>Editar cliente</P>

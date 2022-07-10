@@ -8,6 +8,8 @@ import { db } from "../../db/Queries";
 import Subtitle from "../../components/Subtitle";
 import Title from "../../components/Title";
 
+import { Alert } from "react-native";
+
 const Container = styled.View`
   padding: 15px 15px 0 15px;
 `;
@@ -19,6 +21,14 @@ const InputDiv = styled.View`
   flex-wrap: wrap;
   justify-content: space-between;
   margin: 15px 0;
+`;
+
+const Input = styled.TextInput`
+  padding: 3px 5px;
+  border: 1px solid #000000;
+  font-size: 24px;
+  font-weight: bold;
+  width: 49%;
 `;
 
 const InputSub = styled.TextInput`
@@ -71,14 +81,12 @@ export default function EditVehicle({ route, navigation }) {
   const updateRootList = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        `UPDATE Vehiculos SET Marca=?, Color=? WHERE Matricula=?;`,
-        [vehicle.Marca, vehicle.Color, vehicle.Matricula],
+        `UPDATE Vehiculos SET Marca=?, Color=?, Matricula=? WHERE Id=?;`,
+        [vehicle.Marca, vehicle.Color, vehicle.Matricula, vehicle.Id],
         (_, results) => {
           let temp = new Array();
-
           for (let i = 0; i < vehiculos.length; ++i)
-            if (vehiculos[i].Matricula != vehicle.Matricula)
-              temp.push(vehiculos[i]);
+            if (vehiculos[i].Id != vehicle.Id) temp.push(vehiculos[i]);
 
           temp.push(vehicle);
           setVehiculos(temp);
@@ -92,13 +100,35 @@ export default function EditVehicle({ route, navigation }) {
   };
 
   const handleSave = () => {
+    let alreadyExists = false;
+    vehiculos.forEach((v) => {
+      if (v.Matricula == vehicle.Matricula && v.Id != vehicle.Id)
+        alreadyExists = true;
+    });
+
+    if (alreadyExists) {
+      Alert.alert(
+        "Error",
+        "La matricula ya se encuentra asociada a otro vehiculo",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
+
     updateRootList();
   };
 
   return (
     <Container>
       <Subtitle>SERIAL: {vehicle?.serial}</Subtitle>
-      <Title>{vehicle?.Matricula}</Title>
+      <Input
+        placeholder="Matricula"
+        defaultValue={vehicle?.Matricula}
+        onChangeText={(text) => {
+          setVehicle({ ...vehicle, Matricula: text });
+        }}
+      />
       <InputDiv>
         <InputSub
           placeholder="Marca"
@@ -116,8 +146,12 @@ export default function EditVehicle({ route, navigation }) {
       <Save onPress={() => handleSave()}>
         <P>Guardar</P>
       </Save>
-      <Delete>
-        <P>Eliminar vehiculos</P>
+      <Delete
+        onPress={() => {
+          navigation.navigate("Vehiculos");
+        }}
+      >
+        <P>Cancelar</P>
       </Delete>
     </Container>
   );

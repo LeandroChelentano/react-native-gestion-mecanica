@@ -8,6 +8,8 @@ import Title from "../../components/Title";
 
 import { db } from "../../db/Queries";
 
+import { Alert } from "react-native";
+
 const Container = styled.ScrollView`
   padding: 15px;
 `;
@@ -76,10 +78,22 @@ export default function AddVehicle({ navigation }) {
   const updateRootList = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO Vehiculos (Matricula, serial, Marca, Color) VALUES (?, ?, ?, ?);`,
-        [vehicle.Matricula, vehicle.serial, vehicle.Marca, vehicle.Color],
+        `INSERT INTO Vehiculos (Id, Matricula, serial, Marca, Color) VALUES (?, ?, ?, ?, ?);`,
+        [
+          getId(),
+          vehicle.Matricula,
+          vehicle.serial,
+          vehicle.Marca,
+          vehicle.Color,
+        ],
         (_, results) => {
           let aux = new Array();
+
+          let id = 0;
+          vehiculos.forEach((c) => {
+            if (c.Id > id) id = c.Id;
+          });
+          vehicle.Id = id + 1;
 
           vehiculos.forEach((v) => {
             aux.push(v);
@@ -96,18 +110,33 @@ export default function AddVehicle({ navigation }) {
     });
   };
 
+  const getId = () => {
+    let id = 0;
+    vehiculos.forEach((v) => {
+      if (v.Id > id) id = v.Id;
+    });
+    return id + 1;
+  };
+
   const handleSave = () => {
     if (
       vehicle.Matricula == "" ||
       vehicle.Color == "" ||
       vehicle.serial == "" ||
       vehicle.Marca == ""
-    )
+    ) {
+      Alert.alert("Error", "Hay elementos en blanco", [{ text: "OK" }], {
+        cancelable: false,
+      });
       return;
+    }
 
     try {
-      parseInt(vehicle.serial);
-    } catch {
+      if (isNaN(vehicle.serial)) throw error;
+    } catch (err) {
+      Alert.alert("Error", "La serial debe ser numerica", [{ text: "OK" }], {
+        cancelable: false,
+      });
       return;
     }
 
@@ -117,7 +146,15 @@ export default function AddVehicle({ navigation }) {
         alreadyExists = true;
     });
 
-    if (alreadyExists) return;
+    if (alreadyExists) {
+      Alert.alert(
+        "Error",
+        "La serial y la matricula no pueden ser duplicadas",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+      return;
+    }
 
     updateRootList();
   };

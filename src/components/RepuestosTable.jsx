@@ -21,31 +21,33 @@ const Text = styled.Text`
   padding-left: 5px;
 `;
 
-export default function ClientesTable({ navigation }) {
-  const { clientes } = useContext(ClientsContext);
+export default function InsumosTable({ navigation }) {
+  const { repuestos } = useContext(ClientsContext);
 
   return (
     <>
       <Table>
-        {clientes && clientes.length > 0 ? (
-          clientes.map((cliente, index) => {
+        {repuestos && repuestos.length > 0 ? (
+          repuestos.map((repuesto, index) => {
             return (
               <Row
                 key={index}
                 onPress={() => {
-                  navigation.navigate("Cliente", { clientID: cliente.Id });
+                  navigation.navigate("Repuesto", {
+                    repID: repuesto.Id,
+                  });
                 }}
               >
-                <Text>{`${cliente.Nombre} ${cliente.Apellido}\n\t${cliente.CI}`}</Text>
+                <Text>{`${repuesto.Id} - ${repuesto.Nombre}`}</Text>
               </Row>
             );
           })
         ) : (
-          <Text>No hay clientes</Text>
+          <Text>No hay repuestos</Text>
         )}
       </Table>
-      <Button path="Nuevo Cliente" navigation={navigation}>
-        Nuevo cliente
+      <Button path="Nuevo Repuesto" navigation={navigation}>
+        Nuevo Repuesto
       </Button>
     </>
   );

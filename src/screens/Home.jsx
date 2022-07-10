@@ -3,6 +3,7 @@ import styled from "styled-components/native";
 
 import Button from "../components/Button";
 import Title from "../components/Title";
+import Subtitle from "../components/Subtitle";
 
 import { createTables } from "../db/Queries";
 
@@ -26,6 +27,7 @@ export default function Home({ navigation }) {
       }}
     >
       <Title>Car Treatment Center</Title>
+      <Subtitle>Por: Leandro Chelentano</Subtitle>
       <Button path="Clientes" navigation={navigation}>
         Ver los clientes
       </Button>
@@ -34,6 +36,12 @@ export default function Home({ navigation }) {
       </Button>
       <Button path="Reparaciones" navigation={navigation}>
         Ver las reparaciones
+      </Button>
+      <Button path="Insumos" navigation={navigation}>
+        Ver los insumos
+      </Button>
+      <Button path="Repuestos" navigation={navigation}>
+        Ver los repuestos
       </Button>
     </Container>
   );
