@@ -80,8 +80,16 @@ export default function SpecificTreatment({ route, navigation }) {
   const [cliente, setCliente] = React.useState(null);
   const [vehicle, setVehicle] = React.useState(null);
 
-  const { clientes, reparaciones, setReparaciones, vehiculos } =
-    useContext(ClientsContext);
+  const {
+    clientes,
+    reparaciones,
+    setReparaciones,
+    vehiculos,
+    reparacionInsumo,
+    setReparacionInsumo,
+    reparacionRepuesto,
+    setReparacionRepuesto,
+  } = useContext(ClientsContext);
 
   const { repID } = route.params;
 
@@ -90,7 +98,6 @@ export default function SpecificTreatment({ route, navigation }) {
   }, []);
 
   const getData = () => {
-    let t;
     if (!treatment) {
       const reparacion = reparaciones.find((rep) => rep.Id === repID);
       const cliente = clientes.find((c) => c.Id === reparacion.Cliente);
@@ -161,11 +168,22 @@ export default function SpecificTreatment({ route, navigation }) {
         [treatment.Id],
         (_, results) => {
           let temp = new Array();
-
           for (let i = 0; i < reparaciones.length; ++i)
             if (reparaciones[i].Id != treatment.Id) temp.push(reparaciones[i]);
-
           setReparaciones(temp);
+
+          let aux = [];
+          for (let i = 0; i < reparacionRepuesto.length; ++i)
+            if (reparacionRepuesto[i].Tratamiendo != treatment.Id)
+              aux.push(reparacionRepuesto[i]);
+          setReparacionRepuesto(aux);
+
+          let aux2 = [];
+          for (let i = 0; i < reparacionInsumo.length; ++i)
+            if (reparacionInsumo[i].Tratamiendo != treatment.Id)
+              aux2.push(reparacionInsumo[i]);
+          setReparacionInsumo(aux2);
+
           navigation.navigate("Reparaciones");
         },
         (_, error) => {
@@ -230,7 +248,7 @@ export default function SpecificTreatment({ route, navigation }) {
       <PB>Costo:</PB>
       <InputCI
         placeholder="Costo"
-        defaultValue={treatment?.Costo || "0"}
+        defaultValue={treatment?.Costo == null ? "0" : `${treatment.Costo}`}
         onChangeText={(text) => updateCosto(text)}
       />
       {treatment?.FechaFin == null ? (

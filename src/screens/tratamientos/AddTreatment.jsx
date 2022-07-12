@@ -93,8 +93,15 @@ export default function AddTreatment({ navigation }) {
     FechaInicio: "",
   });
 
-  const { clientes, reparaciones, setReparaciones } =
-    useContext(ClientsContext);
+  const {
+    clientes,
+    reparaciones,
+    setReparaciones,
+    reparacionRepuesto,
+    setReparacionRepuesto,
+    reparacionInsumo,
+    setReparacionInsumo,
+  } = useContext(ClientsContext);
 
   const updateRootList = () => {
     let id = newId();
@@ -114,8 +121,24 @@ export default function AddTreatment({ navigation }) {
           treatment.Id = id;
           treatment.FechaInicio = date;
           aux.push(treatment);
-
           setReparaciones(aux);
+
+          let temp = new Array();
+          reparacionRepuesto.forEach((rr) => {
+            if (rr.Tratamiento != id) {
+              temp.push(rr);
+            }
+          });
+          setReparacionRepuesto(temp);
+
+          let temp2 = new Array();
+          reparacionInsumo.forEach((ri) => {
+            if (ri.Tratamiento != id) {
+              temp2.push(ri);
+            }
+          });
+          setReparacionInsumo(temp2);
+
           navigation.navigate("Reparaciones");
         },
         (_, error) => {

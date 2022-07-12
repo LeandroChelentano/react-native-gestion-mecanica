@@ -149,7 +149,8 @@ export default function TratamientosRepuesto({ route, navigation }) {
       const vehiculo = vehiculos.find((v) => v.Id === cliente.Vehiculo);
       let reps = [];
       reparacionRepuesto.forEach((rr) => {
-        if (rr.Tratamiento === reparacion.Id)
+        console.log("line 152", rr);
+        if (rr.Tratamiento == reparacion.Id)
           reps.push({ Repuesto: rr.Repuesto, Cantidad: rr.Cantidad });
       });
       setTreatment(reparacion);
@@ -171,13 +172,13 @@ export default function TratamientosRepuesto({ route, navigation }) {
 
             for (let i = 0; i < reparacionRepuesto.length; ++i)
               if (
-                reparacionRepuesto[i].Reparacion != treatment.Id &&
+                reparacionRepuesto[i].Tratamiento != treatment.Id &&
                 reparacionRepuesto[i].Repuesto != selectedRepuesto.Id
               )
                 temp.push(reparacionRepuesto[i]);
 
             const obj = {
-              Reparacion: treatment.Id,
+              Tratamiento: treatment.Id,
               Repuesto: selectedRepuesto.Id,
               Cantidad: cant,
             };
@@ -199,7 +200,7 @@ export default function TratamientosRepuesto({ route, navigation }) {
             }
 
             let obj = {
-              Reparacion: treatment.Id,
+              Tratamiento: treatment.Id,
               Repuesto: selectedRepuesto.Id,
               Cantidad: cant,
             };
@@ -222,12 +223,16 @@ export default function TratamientosRepuesto({ route, navigation }) {
         [treatment.Id, repuesto],
         (_, results) => {
           let temp = new Array();
-
           usados.forEach((usado) => {
             if (usado.Repuesto != repuesto) temp.push(usado);
           });
-
           setUsados(temp);
+
+          let aux = [];
+          reparacionRepuesto.forEach((usado) => {
+            if (usado.Repuesto != repuesto) aux.push(usado);
+          });
+          setReparacionRepuesto(aux);
         },
         (_, error) => {
           console.log(error);

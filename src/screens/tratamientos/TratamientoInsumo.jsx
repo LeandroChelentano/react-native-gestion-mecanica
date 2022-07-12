@@ -171,13 +171,13 @@ export default function TratamientoInsumo({ route, navigation }) {
 
             for (let i = 0; i < reparacionInsumo.length; ++i)
               if (
-                reparacionInsumo[i].Reparacion != treatment.Id &&
+                reparacionInsumo[i].Tratamiento != treatment.Id &&
                 reparacionInsumo[i].Insumo != selectedInsumo.Id
               )
                 temp.push(reparacionInsumo[i]);
 
             const obj = {
-              Reparacion: treatment.Id,
+              Tratamiento: treatment.Id,
               Insumo: selectedInsumo.Id,
               Cantidad: cant,
             };
@@ -199,7 +199,7 @@ export default function TratamientoInsumo({ route, navigation }) {
             }
 
             let obj = {
-              Reparacion: treatment.Id,
+              Tratamiento: treatment.Id,
               Insumo: selectedInsumo.Id,
               Cantidad: cant,
             };
@@ -222,12 +222,16 @@ export default function TratamientoInsumo({ route, navigation }) {
         [treatment.Id, insumo],
         (_, results) => {
           let temp = new Array();
-
           usados.forEach((usado) => {
             if (usado.Insumo != insumo) temp.push(usado);
           });
-
           setUsados(temp);
+
+          let aux = [];
+          reparacionInsumo.forEach((usado) => {
+            if (usado.Insumo != insumo) aux.push(usado);
+          });
+          setReparacionInsumo(aux);
         },
         (_, error) => {
           console.log(error);
