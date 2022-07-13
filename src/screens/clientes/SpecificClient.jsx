@@ -107,7 +107,7 @@ export default function SpecificClient({ route, navigation }) {
       {vehicle === null ? (
         <P>No tiene vehiculo registrado</P>
       ) : (
-        <P>{`Matricula: ${vehicle.Matricula}\n\tMarca: "${vehicle.Marca}"\n\tSerial:  "${vehicle.serial}"`}</P>
+        <P>{`Matricula: ${vehicle?.Matricula}\n\tMarca: "${vehicle?.Marca}"\n\tSerial:  "${vehicle?.serial}"`}</P>
       )}
       <Edit
         onPress={() => {

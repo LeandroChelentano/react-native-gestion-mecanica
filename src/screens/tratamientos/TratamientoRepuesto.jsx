@@ -8,7 +8,7 @@ import { ClientsContext } from "../../components/ClientsContext";
 
 import { db } from "../../db/Queries";
 
-const Container = styled.View`
+const Container = styled.ScrollView`
   padding: 15px 15px 0 15px;
 `;
 
@@ -115,7 +115,7 @@ const Save = styled.TouchableHighlight`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin: 20px 0px 30px 0;
 `;
 
 export default function TratamientosRepuesto({ route, navigation }) {

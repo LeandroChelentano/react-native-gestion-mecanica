@@ -1,7 +1,7 @@
 import * as SQLite from "expo-sqlite";
 
 export const db = SQLite.openDatabase(
-  "persistencia.db",
+  "mec.db",
   "1.0.0",
   "Mecanica Database",
   10000000
